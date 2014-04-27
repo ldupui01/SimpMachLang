@@ -1,0 +1,6 @@
+L0 lin 10 10
+L2 lin 1 25
+L3 lin 2 25
+L4 bnz 10 L6
+L5 add 5 1 2
+L6 add 20 1 2

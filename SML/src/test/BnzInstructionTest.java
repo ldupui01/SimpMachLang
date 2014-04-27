@@ -20,13 +20,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import sml.Labels;
+import sml.LinInstruction;
+import sml.Machine;
 import sml.MachineInterface;
+import sml.Registers;
 import sml.RegistersInterface;
 import sml.BnzInstruction;
 import sml.AddInstruction;
 import sml.Instruction;
+import sml.Translator;
 
 public class BnzInstructionTest {
+	
+	Instruction lin;
 	Instruction bnz;
 	Instruction inst1;
 	Instruction inst2;
@@ -42,9 +48,11 @@ public class BnzInstructionTest {
 	@Before
 	public void setUp() throws Exception {
 		initMocks(this);
-		this.bnz = new BnzInstruction("L1",10,"L3");
-		this.inst1 = new AddInstruction("L2", 5, 1, 2);
-		this.inst2 = new AddInstruction("L3", 20, 1, 2);
+		this.lin = new LinInstruction("L0", 1, 10);
+		this.bnz = new BnzInstruction("L1",1,"L3");
+		this.inst1 = new AddInstruction("L2", 5, 1, 1);
+		this.inst2 = new AddInstruction("L3", 20, 1, 1);
+		instAL.add(lin);
 		instAL.add(bnz);
 		instAL.add(inst1);
 		instAL.add(inst2);
@@ -52,6 +60,8 @@ public class BnzInstructionTest {
 		l.addLabel("L2");
 		l.addLabel("L3");
 		example = bnz.toString();
+		
+		
 	}
 
 	@Test
@@ -63,17 +73,27 @@ public class BnzInstructionTest {
 	
 	@Test
 	public final void testExecute() {
-		when(m.getRegisters()).thenReturn(r);
-		when(m.getProg()).thenReturn(instAL);
-		when(r.getRegister(10)).thenReturn(1);
-		when(r.getRegister(5)).thenReturn(100);
-		when(r.getRegister(1)).thenReturn(10);
-		when(r.getRegister(2)).thenReturn(10);
-		when(m.getLabels().indexOf("L3")).thenReturn(2);
-		when(m.getLabels().indexOf("L2")).thenReturn(1);
-		bnz.execute(m);
-		verify(m.getRegisters()).setRegister(20, 20);
+		
+		MachineInterface mi = new Machine();
+		
+		Translator t = new Translator("testMMLbnz.txt");
+		t.readAndTranslate(mi.getLabels(), mi.getProg());
+
+		int expected = 50;
+		mi.execute();
+		RegistersInterface r = mi.getRegisters();
+		int output = r.getRegister(20);
+		//System.out.println(output);
+		assertEquals("Bnz does not jump to the expected register", expected, output);
+		
+		expected = 0;
+		output = r.getRegister(5);
+		System.out.println(output);
+		assertEquals("Bnz does not jump2 to the expected register", expected, output);
+		
 	}
+	
+	
 
 	@Test
 	public final void testBnzInstruction() {
